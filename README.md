@@ -1,4 +1,4 @@
-# C--Ho-
+# CĐ Hoá
 Sau khi thua mùa giải, tôi chuyển sinh 
 
 # Đấu Trường Tinh Dầu
