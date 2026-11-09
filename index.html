@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Đấu Trường Tinh Dầu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;800&display=swap">
+</head>
+<body>
+<style>
+/* Layout: the whole game is the "system" from the intro film — cyan bracketed system windows over a night-navy world; host plates on top, the active window in the middle, MC controls at its foot. Single dark look, by choice. */
+:root{
+  --ink:#0a0f1d; --deep:#0c1a30; --panel:#0e2038; --line:#22385a;
+  --text:#ece7da; --muted:#8fa0bd; --cyan:#5fd3ff; --cyan-dim:rgba(95,211,255,.35);
+  --amber:#f0b44c; --good:#c9e05a; --bad:#e8655a;
+  --water:#5aa9d6; --water-l:#2b4f6e;
+  --t0:#c9d84a; --t1:#f08a3c; --t2:#e05b4b; --t3:#a194f2;
+  --f-display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --f-body:"Be Vietnam Pro","Segoe UI",system-ui,sans-serif;
+  --f-num:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{background:var(--ink);color:var(--text)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 28px;
+  background-image:radial-gradient(ellipse at 50% 0%,rgba(95,211,255,.08),transparent 55%),radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 70% 15%,rgba(255,255,255,.4),transparent),radial-gradient(1px 1px at 85% 60%,rgba(255,255,255,.35),transparent),radial-gradient(1px 1px at 35% 80%,rgba(255,255,255,.3),transparent)}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:.01em}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.eyebrow{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--cyan)}
+.muted{color:var(--muted)}
+.hint{font-size:13px;color:var(--muted)}
+
+/* system window: bracketed corners + soft cyan glow */
+.sys{position:relative;background:linear-gradient(180deg,rgba(14,32,56,.96),rgba(10,22,40,.96));border:1px solid var(--cyan-dim);border-radius:12px;box-shadow:0 0 24px -6px rgba(95,211,255,.45),inset 0 0 40px rgba(95,211,255,.05)}
+.sys::before,.sys::after{content:"";position:absolute;width:22px;height:22px;pointer-events:none;border-color:var(--cyan);border-style:solid}
+.sys::before{top:5px;left:5px;border-width:3px 0 0 3px}
+.sys::after{bottom:5px;right:5px;border-width:0 3px 3px 0}
+.systitle{font-family:var(--f-display);font-weight:700;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;font-size:13px}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:22px;text-transform:uppercase}
+.brand h1 span{color:var(--amber)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:6px;font-weight:600;font-size:14px}
+.btn:hover{border-color:var(--cyan-dim)}
+.btn.primary{background:var(--cyan);color:#04131f;border-color:var(--cyan)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.good{background:var(--good);color:#141a04;border-color:var(--good)}
+.btn.bad{background:transparent;border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* host plates */
+.score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:720px){.score{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.plate{position:relative;background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;min-width:0;transition:transform .2s,border-color .2s,box-shadow .2s}
+.plate.on{border-color:var(--tc);transform:translateY(-2px);box-shadow:0 0 22px -6px var(--tc)}
+.plate .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;min-width:0}
+.plate .nm{font-family:var(--f-display);font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tc)}
+.plate .lv{font-family:var(--f-display);font-weight:700;font-size:13px;color:var(--amber);flex:none}
+.plate .pts{font-family:var(--f-num);font-weight:800;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.plate .pts small{font-size:12px;color:var(--muted);font-weight:600;margin-left:4px}
+.xp{height:6px;border-radius:3px;background:#1b2c48;overflow:hidden}
+.xp i{display:block;height:100%;background:var(--tc);border-radius:3px;transition:width .5s}
+.plate .meta{font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.nmbtn{background:none;border:0;padding:0;text-align:left;min-width:0;cursor:pointer}
+.nmbtn:hover{text-decoration:underline dotted;text-underline-offset:3px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px;border:1px solid var(--line);letter-spacing:.04em}
+.pill.ready{color:var(--cyan);border-color:var(--cyan-dim)}
+.pill.spent{opacity:.4;text-decoration:line-through}
+
+.stage{padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+.banner h2{font-size:22px}
+.who{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.who .sw{width:12px;height:12px;border-radius:3px;background:var(--tc)}
+.progress{font-family:var(--f-num);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* intro */
+.film{display:flex;flex-direction:column;gap:12px}
+.film video{width:100%;max-width:100%;aspect-ratio:16/9;background:#000;border-radius:8px;border:1px solid var(--line);display:block}
+
+/* chapter 1 quest board */
+.lanes{display:flex;flex-direction:column;gap:12px}
+.lane{display:grid;grid-template-columns:210px 1fr;gap:12px;align-items:center}
+@media (max-width:720px){.lane{grid-template-columns:1fr}}
+.lane .lab{font-family:var(--f-display);font-weight:600}
+.lane .lab small{display:block;font-family:var(--f-body);font-weight:400;color:var(--muted);font-size:12px}
+.tiles{display:flex;gap:8px;flex-wrap:wrap}
+.tile{width:64px;height:76px;border-radius:6px;border:1px solid var(--lc);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(0,0,0,.25)),var(--deep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:var(--f-display);font-weight:700;position:relative}
+.tile .q{font-size:24px;color:var(--lc);line-height:1}
+.tile .n{font-size:11px;color:var(--muted);letter-spacing:.08em}
+.tile:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 0 16px -4px var(--lc)}
+.tile:disabled{opacity:.22;cursor:default;border-color:var(--line)}
+.tile:disabled .q{color:var(--muted)}
+
+/* chapter 2 lab map */
+.labgrid{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+@media (max-width:860px){.labgrid{grid-template-columns:1fr}}
+.labcard{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--ink);min-width:0}
+.labcard h3{font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.map{position:relative;width:100%}
+.map svg{display:block;width:100%;height:auto}
+.spot{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:2px solid var(--ink);background:var(--cyan);color:#04131f;font-family:var(--f-num);font-weight:800;font-size:12px;display:grid;place-items:center;box-shadow:0 0 0 3px rgba(95,211,255,.25)}
+.spot:not(:disabled){animation:pulse 2.2s ease-in-out infinite}
+.spot:disabled{background:var(--panel);color:var(--muted);box-shadow:none;cursor:default;animation:none}
+@keyframes pulse{50%{box-shadow:0 0 0 9px rgba(95,211,255,0)}}
+.vs{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px dashed var(--line);border-radius:8px;padding:10px 12px}
+.vs .spot{position:static;margin:0}
+svg text{font-family:var(--f-body)}
+.svlab{fill:var(--muted);font-size:12px}
+.svtitle{fill:var(--text);font-size:13px;font-weight:600}
+
+/* question */
+.qwrap{display:grid;grid-template-columns:1fr 150px;gap:18px;align-items:start}
+@media (max-width:720px){.qwrap{grid-template-columns:1fr}}
+.qtext{font-family:var(--f-display);font-size:clamp(20px,2.6vw,30px);font-weight:600;line-height:1.3;text-wrap:balance}
+.qtag{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+@media (max-width:720px){.opts{grid-template-columns:1fr}}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:var(--deep);border-radius:8px;padding:12px 14px;font-size:16px;min-width:0}
+.opt b{font-family:var(--f-num);color:var(--cyan);flex:none}
+.opt:hover:not(:disabled){border-color:var(--cyan)}
+.opt.x{opacity:.35;text-decoration:line-through}
+.opt.ok{border-color:var(--good);background:rgba(201,224,90,.12)}
+.opt:disabled{cursor:default}
+.timer{display:flex;flex-direction:column;align-items:center;gap:8px}
+.ring{--p:1;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--rc,var(--cyan)) calc(var(--p)*360deg),#1b2c48 0)}
+.ring span{width:96px;height:96px;border-radius:50%;background:var(--panel);display:grid;place-items:center;font-family:var(--f-num);font-weight:800;font-size:38px;font-variant-numeric:tabular-nums}
+.ring.low{--rc:var(--bad)}
+.answer{border-left:4px solid var(--good);background:rgba(201,224,90,.07);padding:12px 14px;border-radius:0 8px 8px 0}
+.answer .k{font-weight:700;font-size:17px}
+.answer .ex{color:var(--muted);margin-top:4px}
+.result{font-family:var(--f-display);font-weight:700;font-size:18px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line);padding-top:14px}
+.controls .sp{flex:1}
+.callout{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--ink);border:1px solid var(--line);border-left:4px solid var(--tc);border-radius:8px;padding:10px 12px}
+.callout .tagname{font-family:var(--f-display);font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;font-size:13px}
+.marks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:720px){.marks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mark{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--deep);text-align:left;display:flex;flex-direction:column;gap:2px;min-width:0}
+.mark .nm{font-weight:700;color:var(--tc);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mark.on{border-color:var(--good);background:rgba(201,224,90,.12)}
+.mark .st{font-size:13px}
+
+/* setup / rules / end */
+.setup{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:860px){.setup{grid-template-columns:1fr}}
+.hero h2{font-size:clamp(26px,4vw,40px);text-transform:uppercase;line-height:1.1}
+.hero h2 span{color:var(--amber)}
+.hero p{max-width:62ch;margin:0}
+.form{display:flex;flex-direction:column;gap:10px}
+.trow{display:grid;grid-template-columns:14px 1fr 92px;gap:10px;align-items:center}
+.trow .sw{width:14px;height:14px;border-radius:3px;background:var(--tc)}
+.trow input{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 10px;color:var(--text);font:inherit;min-width:0}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:860px){.rules{grid-template-columns:1fr}}
+.rules section{background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}
+.rules h3{font-size:16px;margin-bottom:6px}
+.rules ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+td.n{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}
+.overlay{position:fixed;inset:0;background:rgba(4,8,16,.84);z-index:20;overflow:auto;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.overlay .box{max-width:980px;margin:0 auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.rank{display:flex;flex-direction:column;gap:8px}
+.rk{display:grid;grid-template-columns:44px 1fr auto auto;gap:12px;align-items:center;background:var(--ink);border:1px solid var(--line);border-left:5px solid var(--tc);border-radius:8px;padding:10px 14px}
+.rk .no{font-family:var(--f-num);font-weight:800;font-size:22px;color:var(--muted)}
+.rk.first .no{color:var(--amber)}
+.rk .lvl{font-family:var(--f-display);font-weight:700;color:var(--amber);font-size:14px}
+.rk .p{font-family:var(--f-num);font-weight:800;font-size:22px;color:var(--tc)}
+.orderlist{margin:0;padding-left:20px}
+.title-card{text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center;padding:10px 0}
+.title-card .t{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,40px);color:var(--amber);text-transform:uppercase;text-wrap:balance}
+
+/* system toasts */
+.toasts{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));z-index:30;display:flex;flex-direction:column;gap:8px;width:min(340px,calc(100vw - 32px));pointer-events:none}
+.toast{padding:12px 16px;animation:tin .35s ease-out both}
+.toast .systitle{font-size:11px}
+.toast p{margin:2px 0 0;font-weight:600}
+.toast p em{font-style:normal;color:var(--amber)}
+.toast.out{animation:tout .4s ease-in both}
+@keyframes tin{from{opacity:0;transform:translateX(30px)}}
+@keyframes tout{to{opacity:0;transform:translateX(30px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand"><h1>Đấu Trường <span>Tinh Dầu</span></h1><span class="eyebrow" id="roundLabel">Trọng sinh · Hệ thống</span></div>
+    <div class="tools">
+      <button class="btn" data-act="intro">Xem video mở đầu</button>
+      <button class="btn" data-act="outroOpen">Xem video kết</button>
+      <button class="btn" data-act="renameOpen">Đổi tên hội</button>
+      <button class="btn" data-act="rules">Luật chơi</button>
+      <button class="btn" data-act="undo" id="undoBtn">Hoàn tác</button>
+      <button class="btn" data-act="reset">Ván mới</button>
+    </div>
+  </header>
+  <div class="score" id="score"></div>
+  <main class="stage sys" id="stage"></main>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="overlay" id="outroOv" hidden>
+  <div class="box sys">
+    <div class="banner"><div><span class="eyebrow">Video kết thúc</span><h2>Thắng bằng chính thực lực</h2></div><button class="btn" data-act="outroClose">Đóng</button></div>
+    <div class="film"><video id="outroOvVid" src="ket-thuc-v1.mp4" controls playsinline preload="metadata"></video></div>
+  </div>
+</div>
+<div class="overlay" id="renameOv" hidden>
+  <div class="box sys" style="max-width:520px">
+    <h2>Đổi tên hội</h2>
+    <p class="hint" style="margin:0">Đổi tên không ảnh hưởng EXP hay lượt chơi. Để trống ô nào thì hội đó giữ tên cũ.</p>
+    <div class="form" id="renameBody"></div>
+    <div class="controls"><button class="btn primary" data-act="saveNames">Lưu tên</button><button class="btn" data-act="closeRename">Hủy</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="rulesOv" hidden>
+  <div class="box sys">
+    <div class="banner"><h2>Luật chơi</h2><button class="btn" data-act="closeRules">Đóng</button></div>
+    <div id="rulesBody"></div>
+  </div>
+</div>
+<div class="overlay" id="confirmOv" hidden>
+  <div class="box sys" style="max-width:460px">
+    <h2>Bắt đầu ván mới?</h2>
+    <p class="muted">Toàn bộ EXP và tiến trình hiện tại sẽ bị xóa.</p>
+    <div class="controls"><button class="btn bad" data-act="doReset">Xóa và chơi lại</button><button class="btn" data-act="closeConfirm">Giữ ván này</button></div>
+  </div>
+</div>
+
+<script>
+const Q={
+1:{p:1,q:"Tinh dầu là gì và được chiết xuất từ đâu?",o:["Là chất hóa học tổng hợp tạo mùi hương từ thực vật.","Là chất lỏng cô đặc chứa hợp chất thơm dễ bay hơi chiết xuất từ các bộ phận của thực vật.","Là dầu ăn chiết xuất từ hạt và quả chín.","Là nước cất thảo mộc đã pha loãng."],a:1,ex:"Tinh dầu lấy từ hoa, lá, vỏ, thân, rễ hoặc hạt; thường thu bằng chưng cất lôi cuốn hơi nước hoặc chiết."},
+2:{p:1,q:"Điểm khác biệt lớn nhất giữa tinh dầu nguyên chất và hương liệu tổng hợp là gì?",o:["Tinh dầu nguyên chất được chiết xuất 100% từ thảo mộc tự nhiên; hương liệu được pha trộn/tổng hợp từ hóa chất.","Hương liệu tổng hợp tốt cho sức khỏe hơn tinh dầu nguyên chất.","Tinh dầu nguyên chất không có mùi thơm, hương liệu mới có mùi.","Cả hai hoàn toàn giống nhau về nguồn gốc."],a:0,ex:"Hương liệu (fragrance oil) chỉ tái tạo mùi bằng hóa chất nhân tạo."},
+3:{p:1,q:"Những loại tinh dầu nào thường được dùng để hỗ trợ thư giãn, giảm căng thẳng và cải thiện giấc ngủ?",o:["Tràm trà, vỏ bưởi.","Sả chanh, khuynh diệp.","Oải hương, hoa cúc, cam ngọt.","Dầu dừa, jojoba."],a:2,ex:"Ví dụ: vài giọt oải hương trong máy khuếch tán trước giờ ngủ."},
+4:{p:1,q:"Khi sử dụng tinh dầu để thoa lên da, điều quan trọng cần làm trước tiên là gì?",o:["Thoa trực tiếp lên diện tích da lớn để đạt hiệu quả nhanh nhất.","Pha loãng tinh dầu với dầu nền và thử phản ứng trên vùng da nhỏ (cổ tay).","Trộn tinh dầu với nước ấm rồi đắp khăn nóng lên mặt.","Phơi nắng nhẹ để tinh dầu thẩm thấu nhanh vào da."],a:1,ex:"Thoa thử một lượng nhỏ đã pha loãng ở cổ tay trước khi dùng diện rộng."},
+5:{p:1,q:"Đối tượng nào sau đây cần đặc biệt thận trọng khi tiếp xúc hoặc sử dụng một số loại tinh dầu?",o:["Người trưởng thành khỏe mạnh không có bệnh nền.","Phụ nữ mang thai, trẻ sơ sinh và vật nuôi (đặc biệt là mèo).","Người lớn tuổi thường xuyên mất ngủ.","Học sinh, sinh viên đang cần tập trung tinh thần."],a:1,ex:"Mèo đặc biệt nhạy cảm với một số loại tinh dầu."},
+6:{p:1,q:"Nhóm tinh dầu nào thường dùng để khử mùi, làm sạch không gian và xua đuổi côn trùng?",o:["Oải hương, hoa cúc, cam ngọt","Sả chanh, tràm gió, bạch đàn","Hoa hồng, vỏ bưởi","Dầu dừa, dầu olive"],a:1,ex:"Ví dụ: tinh dầu sả chanh pha nước lau sàn để đuổi muỗi."},
+7:{p:1,q:"Khi dùng tinh dầu để massage, cần pha loãng với gì?",o:["Nước lạnh","Cồn 90 độ","Dầu nền như dầu dừa, jojoba, olive","Nước muối sinh lý"],a:2,ex:"Dầu nền giúp tránh kích ứng hoặc bỏng rát da."},
+8:{p:1,q:"Vì sao không được uống trực tiếp tinh dầu nguyên chất?",o:["Vì tinh dầu có vị đắng","Vì tinh dầu không có tác dụng khi uống","Vì nồng độ tinh dầu nguyên chất rất cao","Vì tinh dầu sẽ bay hơi hết trong miệng"],a:2,ex:"Tinh dầu là chất lỏng cô đặc, không dùng để uống."},
+9:{p:1,q:"Nếu tinh dầu vô tình dính vào mắt, cách xử lý đúng là gì?",o:["Nhỏ thêm dầu nền vào mắt","Rửa ngay bằng nhiều nước sạch hoặc nước muối sinh lý, nếu còn rát kéo dài thì đến cơ sở y tế","Dụi mắt cho tinh dầu bay hơi","Chờ tinh dầu tự hết"],a:1,ex:"Tránh xa mắt, niêm mạc mũi và vết thương hở."},
+10:{p:2,q:"Điều kiện để tách một chất bằng phương pháp chưng cất lôi cuốn hơi nước là gì?",o:["Chất đó tan tốt trong nước","Chất đó có nhiệt độ sôi thấp hơn 50 °C","Chất đó bay hơi được cùng hơi nước và không tan (hoặc rất ít tan) trong nước","Chất đó nặng hơn nước"],a:2,ex:"Ví dụ: tinh dầu sả dễ bay hơi và ít tan trong nước."},
+11:{p:2,q:"Ưu điểm lớn nhất của phương pháp chưng cất lôi cuốn hơi nước là gì?",o:["Không cần dùng nguồn nhiệt","Chất được tách ở nhiệt độ thấp hơn nhiệt độ sôi của nó nên ít bị phân hủy","Thu được 100% tinh dầu, không hao hụt","Thực hiện được với mọi loại nguyên liệu"],a:1,ex:"Tinh dầu sôi ở 200–300 °C nhưng được kéo ra dưới 100 °C, nên ít bị oxi hóa, nhiệt phân."},
+12:{p:2,q:"Vì sao hỗn hợp tinh dầu và nước luôn sôi dưới 100 °C?",o:["Vì tinh dầu làm nước sôi nhanh hơn","Vì hỗn hợp sôi khi tổng áp suất hơi của tinh dầu và nước bằng áp suất khí quyển","Vì tinh dầu tan hoàn toàn trong nước","Vì nhiệt độ sôi của tinh dầu luôn thấp hơn nước"],a:1,ex:"Hai chất không trộn lẫn nên mỗi chất tự tạo áp suất hơi riêng; cộng lại nên đạt áp suất khí quyển sớm hơn."},
+13:{p:2,q:"Sản phẩm phụ “hydrosol” của quá trình chưng cất là gì?",o:["Bã nguyên liệu sau khi chưng cất","Tinh dầu đã tinh chế","Lớp nước chưng cất còn chứa một lượng nhỏ tinh dầu hòa tan","Hơi nước chưa ngưng tụ"],a:2,ex:"Hydrosol được dùng làm nước hoa hồng, xịt khoáng, nước thơm."},
+14:{p:2,q:"Tinh dầu nào sau đây nặng hơn nước, nên chìm xuống dưới khi tách lớp?",o:["Tinh dầu sả chanh","Tinh dầu bạc hà","Tinh dầu quế và đinh hương","Tinh dầu cam"],a:2,ex:"Phần lớn tinh dầu nổi lên trên; quế (Yên Bái, Quảng Nam) là ví dụ điển hình loại chìm."},
+15:{p:2,q:"Vì sao hoa nhài, hoa huệ không phù hợp với phương pháp chưng cất lôi cuốn hơi nước?",o:["Vì chúng chứa quá nhiều tinh dầu","Vì hương dễ bị phá hủy và hàm lượng tinh dầu rất thấp, cho hiệu suất kém","Vì chúng tan hoàn toàn trong nước","Vì chúng quá cứng, không cắt nhỏ được"],a:1,ex:"Đúng như hệ thống nhắc trong video: với các loài hoa này, dùng chiết bằng dung môi hoặc CO₂ lỏng."},
+16:{p:3,q:"Phương pháp chiết dựa trên nguyên tắc nào?",o:["Sự khác nhau về nhiệt độ sôi của các chất","Sự khác nhau về khối lượng của các chất","Sự khác nhau về độ hòa tan của các chất trong hai môi trường không trộn lẫn vào nhau","Sự khác nhau về màu sắc của các chất"],a:2,ex:"Dung môi thấm qua màng tế bào và hòa tan các chất trong tinh dầu."},
+17:{p:3,q:"Khi nào nên dùng phương pháp chiết thay cho các phương pháp tách tinh dầu khác?",o:["Khi nguyên liệu chứa rất nhiều tinh dầu","Khi nguyên liệu chứa ít tinh dầu hoặc các cấu tử dễ bị phân hủy ở nhiệt độ cao","Khi muốn tiết kiệm thời gian tối đa","Khi không có dung môi"],a:1,ex:"Ví dụ: hoa nhài, hoa huệ có hương dễ bị phá hủy khi đun."},
+18:{p:3,q:"Nhược điểm của phương pháp chiết tinh dầu bằng CO₂ lỏng là gì?",o:["Hiệu suất thấp","Tinh dầu kém chất lượng","Tốn nhiều dung môi","Chi phí đầu tư cao"],a:3,ex:"Ưu điểm: hiệu quả, hiệu suất cao, chất lượng tốt, tiết kiệm dung môi."},
+19:{p:3,q:"Yêu cầu quan trọng đối với dung môi dùng để chiết tinh dầu là gì?",o:["Dễ tách khỏi tinh dầu","Phải có màu để dễ quan sát","Phải tan hoàn toàn trong nước","Phải có mùi thơm mạnh"],a:0,ex:"Dung môi thường dùng: ether dầu hỏa, hexane, diethyl ether, ethanol…"},
+20:{p:4,q:"Trong TN1, vì sao phải cho đá bọt hoặc bọt sứ vào bình?",o:["Để tăng lượng tinh dầu thu được","Để hạn chế hiện tượng sôi trào","Để làm lạnh hỗn hợp","Để tạo mùi thơm"],a:1,ex:"Đá bọt giúp hỗn hợp sôi đều, không trào."},
+21:{p:4,q:"Thao tác nào phải làm trước khi bắt đầu đun bình chưng cất?",o:["Lắp phễu chiết vào bình","Mở nước làm lạnh ống sinh hàn","Thêm ethanol vào bình","Đậy kín miệng bình hứng"],a:1,ex:"Chưa có nước lạnh thì hơi nước và tinh dầu không ngưng tụ được."},
+22:{p:4,q:"Vì sao sả chỉ được cắt nhỏ mà không giã nát?",o:["Vì giã nát làm sả mất màu","Vì giã nát làm nguyên liệu bị nhão và tinh dầu dễ bay hơi hao hụt trước khi chưng cất","Vì cắt nhỏ giúp sả tan trong nước","Vì giã nát tốn nhiều thời gian"],a:1,ex:"Cắt khúc khoảng 1 cm là đủ tăng diện tích tiếp xúc với nước."},
+23:{p:4,q:"Trong TN2, vì sao chỉ lấy phần vỏ cam màu vàng?",o:["Vì phần vỏ trắng có độc","Vì phần vỏ vàng dễ nghiền hơn","Vì phần vỏ vàng chứa nhiều tinh dầu hơn phần vỏ trắng","Vì phần vỏ trắng tan trong ethanol"],a:2,ex:"Loại bỏ phần cùi trắng trước khi phơi khô và nghiền."},
+24:{p:4,q:"Vì sao sản phẩm thu được ở TN2 được gọi là “tinh dầu cam thô”?",o:["Vì chưa được phơi khô","Vì ethanol đồng thời chiết thêm một số chất khác như sắc tố, sáp và một ít nước","Vì tinh dầu chưa có mùi thơm","Vì chỉ ngâm trong 1 tuần"],a:1,ex:"Sản phẩm là chất lỏng sánh, màu vàng, còn lẫn tạp chất."},
+25:{p:4,q:"Vì sao phải bảo quản tinh dầu trong lọ tối màu và đậy kín?",o:["Để tinh dầu không bị đông đặc","Để tinh dầu có màu đẹp hơn","Để hạn chế tác động của ánh sáng và không khí, giúp tinh dầu ít bị biến đổi","Để tinh dầu bay hơi chậm lại khi sử dụng"],a:2,ex:"Ánh sáng và oxi trong không khí làm tinh dầu biến đổi mùi."},
+26:{p:4,q:"Mục đích của thí nghiệm 1 là gì?",a:"Thu được tinh dầu từ cây sả."},
+27:{p:4,q:"Tại sao phải cắt nhỏ cây sả trước khi chưng cất?",a:"Giúp tinh dầu dễ thoát ra hơn."},
+28:{p:4,q:"Tại sao phải đun nóng hỗn hợp?",a:"Để tạo hơi nước kéo theo tinh dầu."},
+29:{p:4,q:"Ống sinh hàn có tác dụng gì?",a:"Làm lạnh hơi nước và tinh dầu để chúng ngưng tụ thành chất lỏng."},
+30:{p:4,q:"Tại sao có thể tách tinh dầu ra khỏi nước?",a:"Vì tinh dầu ít tan trong nước và tạo thành hai lớp."},
+31:{p:4,q:"Tại sao không được đun cạn nước?",a:"Để tránh làm hỏng bình và gây mất an toàn."},
+32:{p:4,q:"Mục đích của thí nghiệm 2 là gì?",a:"Thu được tinh dầu từ vỏ cam."},
+33:{p:4,q:"Ethanol có vai trò gì trong thí nghiệm 2?",a:"Hòa tan và kéo tinh dầu ra khỏi vỏ cam."},
+34:{p:4,q:"Tại sao phải nghiền nhỏ vỏ cam?",a:"Tăng diện tích tiếp xúc với ethanol, giúp chiết tinh dầu hiệu quả hơn."},
+35:{p:4,q:"Tại sao phải lọc hỗn hợp sau khi ngâm?",a:"Để loại bỏ bã vỏ cam, thu dịch chiết."},
+36:{p:4,q:"Tại sao phải làm bay hơi ethanol?",a:"Để loại bỏ dung môi và thu phần tinh dầu còn lại."},
+37:{p:4,q:"Tại sao phải tránh xa nguồn lửa khi làm bay hơi ethanol?",a:"Vì ethanol rất dễ cháy."},
+38:{p:4,q:"Hai thí nghiệm sử dụng phương pháp nào?",a:"TN1: chưng cất với nước. TN2: chiết bằng dung môi."},
+39:{p:4,q:"Dung môi được sử dụng trong TN2 là gì?",a:"Ethanol 96%."},
+40:{p:4,q:"Điểm khác biệt chính giữa hai thí nghiệm là gì?",a:"TN1 dùng hơi nước để kéo tinh dầu ra khỏi sả; TN2 dùng ethanol để hòa tan tinh dầu từ vỏ cam."}
+};
+const PART={1:"Tinh dầu · Gia Huy",2:"Chưng cất lôi cuốn hơi nước · Minh Trân",3:"Phương pháp chiết · Minh Khang",4:"Thực hành · Thiên Phúc"};
+const LANES=[{k:"top",name:"Thư viện Tinh dầu",sub:"Gia Huy · 8 nhiệm vụ",ids:[1,2,3,4,6,7,8,9],c:"var(--t3)"},{k:"mid",name:"Lò Chưng cất",sub:"Minh Trân · 5 nhiệm vụ",ids:[10,11,13,14,15],c:"var(--water)"},{k:"bot",name:"Xưởng Chiết",sub:"Minh Khang · 3 nhiệm vụ",ids:[16,17,19],c:"var(--t0)"}];
+const R1_TF=[5,12,18], R2_TF=[20,23,21,25,24];
+const SPOTS_TN1=[{id:26,x:15,y:8},{id:27,x:15,y:72},{id:22,x:26,y:78},{id:31,x:27,y:60},{id:28,x:20,y:93},{id:29,x:47,y:40},{id:30,x:88,y:52}];
+const SPOTS_TN2=[{id:32,x:22,y:9},{id:34,x:10,y:42},{id:33,x:30,y:42},{id:35,x:70,y:42},{id:36,x:90,y:30},{id:37,x:90,y:60}];
+const VS=[38,39,40];
+const PTS={1:{turn:10,steal:5,tf:10},2:{turn:20,steal:10,tf:20,boss:30}};
+const LV=50;
+const TIME={mc:20,sa:30,steal:15,tf:25};
+const TEAMDEF=[{name:"Hội Sả Chanh",c:"var(--t0)"},{name:"Hội Vỏ Cam",c:"var(--t1)"},{name:"Hội Quế",c:"var(--t2)"},{name:"Hội Oải Hương",c:"var(--t3)"}];
+const TN1_ORDER=["Cắt nhỏ sả, cho vào bình, thêm nước","Cho đá bọt, đun sôi: hơi nước kéo theo tinh dầu","Hơi đi qua ống sinh hàn, ngưng tụ thành chất lỏng","Dùng phễu chiết tách lấy tinh dầu"];
+const TN2_ORDER=["Phơi khô, nghiền nhỏ vỏ cam","Ngâm ngập trong ethanol 96%","Đậy kín, ngâm khoảng 1 tuần","Lọc bỏ bã, thu dịch chiết","Cho ethanol bay hơi, thu tinh dầu cam thô"];
+const CH={1:"Chương 1 · Tân Thủ Thôn",2:"Chương 2 · Phòng Luyện Dầu"};
+
+const KEY="dttd-system-v1";
+let S=null,hist=[],timer={end:0,total:0,id:null,paused:false,left:0};
+function fresh(){return{phase:"intro",round:0,teams:TEAMDEF.map(t=>({name:t.name,members:9,score:0,spk:0,flash:[false,false]})),sched:[],idx:0,used:{},lanes:{},cur:null,tf:null,tiebreak:null,back:null}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.teams)return s}catch(e){}return fresh()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function push(){hist.push(JSON.stringify(S));if(hist.length>40)hist.shift()}
+S=(window.claude&&window.claude.hot&&window.claude.hot.data&&window.claude.hot.data.S)||load();
+try{window.claude?.hot?.snapshot?.(()=>({S}))}catch(e){}
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const tc=i=>TEAMDEF[i].c;
+const lvl=s=>Math.floor(s/LV)+1;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function buildSched(r){const s=[],tf=r===1?R1_TF:R2_TF;let k=0;
+  for(let c=0;c<4;c++){for(let i=0;i<4;i++)s.push({kind:"turn",team:(c+i)%4,cycle:c+1});
+    if(r===1&&c>=1)s.push({kind:"tf",qid:tf[k++]});if(r===2)s.push({kind:"tf",qid:tf[k++]})}
+  if(r===2)s.push({kind:"tf",qid:tf[k++],boss:true});return s}
+function takeSpeaker(t){const tm=S.teams[t];const n=tm.spk+1;tm.spk=(tm.spk+1)%Math.max(1,tm.members);return n}
+
+/* sound + toasts */
+let actx=null;
+function tone(f,d,v){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=f;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(v||.12,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.start();o.stop(actx.currentTime+d)}catch(e){}}
+function ding(){tone(1318,.5);setTimeout(()=>tone(1760,.4,.08),90)}
+function levelSound(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.35,.1),i*80))}
+function toast(html){const el=document.createElement("div");el.className="toast sys";el.innerHTML=`<div class="systitle">[ Hệ thống ]</div><p>${html}</p>`;$("toasts").appendChild(el);
+  setTimeout(()=>el.classList.add("out"),3600);setTimeout(()=>el.remove(),4100)}
+function award(t,x){const before=lvl(S.teams[t].score);S.teams[t].score+=x;const after=lvl(S.teams[t].score);
+  toast(`${esc(S.teams[t].name)} nhận <em>+${x} EXP</em>`);
+  if(after>before){setTimeout(()=>{toast(`${esc(S.teams[t].name)} <em>lên Cấp ${after}!</em>`);levelSound()},400)}else ding()}
+
+/* timer */
+function startTimer(sec){clearInterval(timer.id);timer={end:Date.now()+sec*1000,total:sec,id:null,paused:false,left:sec};timer.id=setInterval(tick,200);tick()}
+function stopTimer(){clearInterval(timer.id);timer.id=null}
+function tick(){const ring=document.getElementById("ring");let left=timer.paused?timer.left:Math.max(0,(timer.end-Date.now())/1000);
+  if(ring){ring.style.setProperty("--p",timer.total?left/timer.total:0);ring.querySelector("span").textContent=Math.ceil(left);ring.classList.toggle("low",left<=5)}
+  if(!timer.paused&&left<=0&&timer.id){stopTimer();tone(330,.6,.15)}}
+function addTime(s){if(timer.paused)timer.left+=s;else timer.end+=s*1000;timer.total+=s;tick()}
+
+const $=id=>document.getElementById(id);
+function render(){
+  save();$("undoBtn").disabled=!hist.length;
+  $("roundLabel").textContent=S.round?CH[S.round]:S.phase==="end"?"Tổng kết":"Trọng sinh · Hệ thống";
+  renderScore();
+  const keepVideo=S.phase==="intro"&&document.getElementById("introVid");
+  if(keepVideo)return;
+  $("stage").innerHTML=({intro:vIntro,setup:vSetup,board:vBoard,question:vQuestion,tf:vTF,interlude:vInterlude,end:vEnd})[S.phase]();
+  tick();
+}
+function activeTeams(){if(S.phase==="board")return[S.sched[S.idx].team];if(S.phase==="question")return[S.cur.stage==="steal"?S.cur.stealTeam:S.cur.team];return[]}
+function renderScore(){
+  const on=activeTeams();
+  $("score").innerHTML=S.teams.map((t,i)=>{const r=S.round||1,used=t.flash[r-1],lv=lvl(t.score),pr=(t.score%LV)/LV*100;
+    return `<div class="plate${on.includes(i)?" on":""}" style="--tc:${tc(i)}">
+      <div class="row"><button class="nm nmbtn" data-act="renameOpen" title="Bấm để đổi tên hội">${esc(t.name)}</button><span class="lv">Cấp ${lv}</span></div>
+      <div class="pts">${t.score}<small>EXP</small></div>
+      <div class="xp" title="${t.score%LV}/${LV} EXP tới cấp sau"><i style="width:${pr}%"></i></div>
+      <div class="meta"><span>Ký chủ kế tiếp: số ${t.spk+1}/${t.members}</span>${S.round?`<span class="pill ${used?"spent":"ready"}">Ngưng đọng thời gian</span>`:""}</div>
+    </div>`}).join("")}
+
+function rulesHTML(){return `<div class="rules">
+  <section><h3>Ký chủ và lượt trả lời</h3><ul>
+    <li>Lớp chia 4 hội. Mỗi bạn là một ký chủ, mang một số thứ tự trong hội (1, 2, 3…).</li>
+    <li>Mỗi lần hội được hỏi, hệ thống chọn đúng <b>một ký chủ theo số</b>. Chỉ người đó được nói đáp án. Đồng đội được bàn trong thời gian đếm ngược, nhưng nhắc to thay thì lượt bị tính sai.</li>
+    <li>Số thứ tự tăng dần sau mỗi lần trả lời. Không ai trả lời lần hai khi đồng đội chưa tới lượt.</li>
+  </ul></section>
+  <section><h3>Nhiệm vụ chính</h3><ul>
+    <li>Mỗi chương có 4 chu kỳ. Trong mỗi chu kỳ, mỗi hội nhận đúng 1 nhiệm vụ chính.</li>
+    <li>Hội mở màn xoay vòng: chu kỳ 1 Hội 1 đi trước, chu kỳ 2 Hội 2 đi trước, cứ thế tiếp tục.</li>
+    <li>Hội đến lượt tự chọn một cuộn nhiệm vụ úp (Chương 1) hoặc một điểm trên hình thí nghiệm (Chương 2). Câu hỏi giấu cho đến khi chọn.</li>
+  </ul></section>
+  <section><h3>Cơ duyên (cướp lượt)</h3><ul>
+    <li>Trả lời sai hoặc hết giờ: cơ duyên rơi vào <b>hội đứng ngay sau</b> theo thứ tự chu kỳ, có 15 giây.</li>
+    <li>Không ai giơ tay giành quyền, nên mỗi hội có đúng 1 cơ duyên trong mỗi chu kỳ.</li>
+    <li>Nắm được cơ duyên nhận nửa số EXP. Trả lời sai không bị trừ EXP.</li>
+  </ul></section>
+  <section><h3>Sự kiện thế giới</h3><ul>
+    <li>Cả 4 hội cùng trả lời một câu: viết đáp án lên giấy hoặc bảng trong 25 giây rồi giơ lên cùng lúc.</li>
+    <li>Người viết cũng theo số thứ tự. Mọi hội đúng đều nhận EXP.</li>
+    <li>Chương 1: sau chu kỳ 2, 3, 4. Chương 2: sau mỗi chu kỳ, cuối chương có Boss.</li>
+  </ul></section>
+  <section><h3>Kỹ năng: Ngưng đọng thời gian</h3><ul>
+    <li>Mỗi hội được dùng 1 lần mỗi chương, khi đang tới lượt mình (kể cả lúc nhận cơ duyên), để cộng thêm 10 giây.</li>
+  </ul></section>
+  <section><h3>EXP và cấp độ</h3><div class="tablewrap"><table>
+    <tr><th></th><th>Chương 1</th><th>Chương 2</th></tr>
+    <tr><td>Nhiệm vụ chính đúng</td><td class="n">10</td><td class="n">20</td></tr>
+    <tr><td>Cơ duyên đúng</td><td class="n">5</td><td class="n">10</td></tr>
+    <tr><td>Sự kiện thế giới đúng</td><td class="n">10</td><td class="n">20</td></tr>
+    <tr><td>Boss cuối chương</td><td class="n">–</td><td class="n">30</td></tr>
+  </table></div>
+  <p class="hint">Cứ 50 EXP lên 1 cấp. EXP Chương 2 gấp đôi, nên hội đang thua vẫn có thể lật ngược.</p></section>
+  <section><h3>Vì sao công bằng</h3><ul>
+    <li>Mỗi hội có 8 nhiệm vụ chính, 8 sự kiện thế giới và 8 cơ duyên, như nhau.</li>
+    <li>Câu hỏi chọn úp, không hội nào biết trước câu khó hay dễ.</li>
+    <li>Không có câu nào giành quyền bằng tốc độ.</li>
+  </ul></section>
+  <section><h3>Thử thách thăng thiên (khi hòa)</h3><ul>
+    <li>Các hội hòa nhất cùng viết thứ tự đúng các bước của TN1. Hội đúng hoàn toàn nhận danh hiệu.</li>
+    <li>Vẫn hòa thì làm tiếp với TN2. Vẫn hòa thì cùng nhận danh hiệu.</li>
+  </ul></section>
+</div>`}
+
+function vIntro(){
+  return `<div class="film"><div class="banner"><div><span class="eyebrow">Mở đầu</span><h2>Trọng Sinh: Ta Là Nhà Tinh Dầu Học</h2></div></div>
+    <video id="introVid" src="mo-dau-v3.mp4" controls playsinline preload="metadata"></video>
+    <div class="controls"><span class="hint">Bấm phát để xem phần mở đầu, khoảng 1 phút, có âm thanh.</span><span class="sp"></span>
+      <button class="btn${S.back?"":" primary"}" data-act="toSetup" id="afterIntro">${S.back?"Quay lại trận đấu":"Liên kết ký chủ"}</button></div></div>`}
+function vSetup(){
+  return `<div class="setup">
+    <div class="hero" style="display:flex;flex-direction:column;gap:12px">
+      <span class="systitle">[ Hệ thống ] Phát hiện 4 hội ký chủ</span>
+      <h2>Nhiệm vụ: trở thành <span>Đại Tinh Dầu Học Sư</span></h2>
+      <p class="muted"><b>Chương 1 · Tân Thủ Thôn</b>: 19 nhiệm vụ về tinh dầu, chưng cất lôi cuốn hơi nước và phương pháp chiết.</p>
+      <p class="muted"><b>Chương 2 · Phòng Luyện Dầu</b>: 21 nhiệm vụ về hai thí nghiệm, chọn ngay trên hình dụng cụ, cuối chương đánh Boss.</p>
+      <p class="muted">Hệ thống chỉ mở cổng trở về và trao kỹ năng thượng thừa Thần Thao Tác cho hội đạt cấp cao nhất. Màn hình này dành cho MC điều khiển.</p>
+      <div><button class="btn" data-act="rules">Đọc luật chơi</button></div>
+    </div>
+    <div class="form">
+      <h3>Đặt tên hội</h3>
+      ${S.teams.map((t,i)=>`<div class="trow" style="--tc:${tc(i)}"><span class="sw"></span>
+        <input id="tn${i}" value="${esc(t.name)}" aria-label="Tên hội ${i+1}">
+        <input id="tm${i}" type="number" min="1" max="40" value="${t.members}" aria-label="Số ký chủ hội ${i+1}"></div>`).join("")}
+      <p class="hint">Cột bên phải là số thành viên mỗi hội, dùng để xoay người trả lời.</p>
+      <div><button class="btn primary" data-act="start">Vào Chương 1</button></div>
+    </div></div>`}
+
+function turnBanner(){const sl=S.sched[S.idx],t=S.teams[sl.team];const n=S.sched.filter(x=>x.kind==="turn").indexOf(sl)+1;
+  return `<div class="banner"><div><span class="eyebrow">Chu kỳ ${sl.cycle} · Nhiệm vụ chính ${n}/16</span>
+    <h2 class="who" style="--tc:${tc(sl.team)}"><span class="sw"></span>${esc(t.name)} nhận nhiệm vụ</h2></div>
+    <span class="progress">Ký chủ được chọn: số ${t.spk+1}</span></div>`}
+function vBoard(){
+  if(S.round===1)return turnBanner()+`<div class="lanes">${LANES.map(L=>`<div class="lane"><div class="lab">${L.name}<small>${L.sub}</small></div>
+    <div class="tiles">${S.lanes[L.k].map((id,i)=>`<button class="tile" style="--lc:${L.c}" data-act="pick" data-id="${id}" ${S.used[id]?"disabled":""} aria-label="${L.name}, cuộn ${i+1}"><span class="q">${S.used[id]?"✓":"?"}</span><span class="n">CUỘN ${i+1}</span></button>`).join("")}</div></div>`).join("")}</div>
+    <p class="hint">Mỗi cuộn giấu một câu hỏi. Sự kiện thế giới xuất hiện sau chu kỳ 2, 3 và 4.</p>`;
+  return turnBanner()+labMap(true)}
+function spotBtn(s,live){return `<button class="spot" style="left:${s.x}%;top:${s.y}%" data-act="pick" data-id="${s.id}" ${S.used[s.id]||!live?"disabled":""} aria-label="Nhiệm vụ ${s.id}">${s.id}</button>`}
+function labMap(live){return `<div class="labgrid">
+   <div class="labcard"><h3>TN1 · Tinh dầu sả chanh <span class="pill">chưng cất</span></h3><div class="map">${svgTN1()}${SPOTS_TN1.map(s=>spotBtn(s,live)).join("")}</div></div>
+   <div class="labcard"><h3>TN2 · Tinh dầu cam <span class="pill">chiết bằng ethanol</span></h3><div class="map">${svgTN2()}${SPOTS_TN2.map(s=>spotBtn(s,live)).join("")}</div></div></div>
+  <div class="vs"><b>So sánh TN1 với TN2</b>${VS.map(id=>`<button class="spot" data-act="pick" data-id="${id}" ${S.used[id]||!live?"disabled":""} aria-label="Nhiệm vụ so sánh ${id}">${id}</button>`).join("")}<span class="hint">Mỗi chấm sáng là một nhiệm vụ gắn với bộ phận đó trên hình.</span></div>`}
+function svgTN1(){return `<svg viewBox="0 0 600 330" role="img" aria-label="Sơ đồ chưng cất tinh dầu sả">
+ <defs><clipPath id="fl"><circle cx="120" cy="215" r="48"/></clipPath><clipPath id="sf"><ellipse cx="530" cy="170" rx="30" ry="56"/></clipPath></defs>
+ <text x="40" y="24" class="svtitle">Sả 200 g · cắt khúc 1 cm · nước ngập 2 cm</text>
+ <rect x="62" y="300" width="116" height="20" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+ <path d="M100 298 q6 -14 0 -22 q10 8 6 22z M120 298 q8 -18 0 -28 q14 10 6 28z M140 298 q6 -14 0 -22 q10 8 6 22z" fill="var(--t1)"/>
+ <rect x="110" y="118" width="20" height="56" fill="none" stroke="var(--text)" stroke-width="2"/>
+ <circle cx="120" cy="215" r="48" fill="none" stroke="var(--text)" stroke-width="2"/>
+ <g clip-path="url(#fl)"><rect x="60" y="200" width="130" height="80" fill="var(--water-l)"/>
+  <g fill="var(--t0)"><rect x="92" y="222" width="14" height="6" rx="2"/><rect x="112" y="240" width="14" height="6" rx="2" transform="rotate(25 119 243)"/><rect x="132" y="218" width="14" height="6" rx="2" transform="rotate(-20 139 221)"/><rect x="100" y="250" width="14" height="6" rx="2"/><rect x="138" y="242" width="14" height="6" rx="2"/></g>
+  <g fill="var(--text)" opacity=".8"><circle cx="110" cy="258" r="3"/><circle cx="128" cy="256" r="2.5"/><circle cx="146" cy="232" r="2.5"/></g></g>
+ <path d="M120 118 L120 104 L160 104" fill="none" stroke="var(--text)" stroke-width="2"/>
+ <line x1="160" y1="104" x2="400" y2="186" stroke="var(--water-l)" stroke-width="30" stroke-linecap="round"/>
+ <line x1="160" y1="104" x2="400" y2="186" stroke="var(--text)" stroke-width="6" stroke-linecap="round" opacity=".85"/>
+ <path d="M372 186 v34" stroke="var(--water)" stroke-width="5"/><text x="300" y="238" class="svlab">nước lạnh vào</text>
+ <path d="M188 104 v-34" stroke="var(--water)" stroke-width="5"/><text x="196" y="72" class="svlab">nước ra</text>
+ <text x="250" y="122" class="svlab" transform="rotate(18 250 122)">ống sinh hàn</text>
+ <path d="M400 186 L412 214" stroke="var(--text)" stroke-width="3"/>
+ <path d="M404 214 h18 v26 l30 52 h-78 l30 -52z" fill="none" stroke="var(--text)" stroke-width="2"/>
+ <path d="M384 270 h58 l10 22 h-78z" fill="var(--water-l)"/><path d="M392 258 h44 l6 12 h-56z" fill="var(--amber)"/>
+ <text x="378" y="312" class="svlab">bình hứng</text>
+ <text x="22" y="326" class="svlab">bếp đun</text>
+ <text x="176" y="268" class="svlab">bình cầu: sả + nước + đá bọt</text>
+ <path d="M520 98 h20 M530 98 v16" stroke="var(--text)" stroke-width="2"/>
+ <ellipse cx="530" cy="170" rx="30" ry="56" fill="none" stroke="var(--text)" stroke-width="2"/>
+ <g clip-path="url(#sf)"><rect x="495" y="168" width="70" height="60" fill="var(--water-l)"/><rect x="495" y="146" width="70" height="22" fill="var(--amber)"/></g>
+ <path d="M530 226 v22" stroke="var(--text)" stroke-width="2"/><rect x="522" y="238" width="16" height="6" fill="var(--muted)"/><path d="M530 248 v30" stroke="var(--text)" stroke-width="2"/>
+ <text x="500" y="302" class="svlab">phễu chiết</text>
+</svg>`}
+function svgTN2(){const xs=[60,180,300,420,540];
+ const labels=[["Vỏ cam khô","nghiền nhỏ"],["Ngập trong","ethanol 96%"],["Đậy kín","~ 1 tuần"],["Lọc bỏ bã","thu dịch chiết"],["Bay hơi ethanol","tinh dầu thô"]];
+ const icons=[`<path d="M38 112 q22 -30 44 0" fill="none" stroke="var(--t1)" stroke-width="8" stroke-linecap="round"/><path d="M44 128 q16 -20 32 0" fill="none" stroke="var(--t1)" stroke-width="6" stroke-linecap="round"/><circle cx="56" cy="138" r="3" fill="var(--t1)"/><circle cx="68" cy="140" r="2.5" fill="var(--t1)"/>`,
+  `<rect x="152" y="86" width="56" height="62" rx="6" fill="none" stroke="var(--text)" stroke-width="2"/><rect x="153" y="102" width="54" height="45" fill="var(--water-l)"/><path d="M162 120 q8 -8 16 0 M182 132 q8 -8 16 0" stroke="var(--t1)" stroke-width="4" fill="none"/><rect x="148" y="80" width="64" height="8" rx="2" fill="var(--muted)"/>`,
+  `<rect x="272" y="88" width="56" height="56" rx="6" fill="var(--panel)" stroke="var(--line)"/><rect x="272" y="88" width="56" height="14" rx="6" fill="var(--t2)"/><text x="300" y="134" text-anchor="middle" style="font:800 24px var(--f-num)" fill="var(--text)">7</text><text x="300" y="98" text-anchor="middle" style="font:600 9px var(--f-body)" fill="var(--ink)">NGÀY</text>`,
+  `<path d="M390 86 h60 l-24 32 v20 h-12 v-20z" fill="none" stroke="var(--text)" stroke-width="2"/><path d="M396 90 h48 l-20 24 h-8z" fill="var(--t1)" opacity=".55"/><path d="M420 140 v8" stroke="var(--amber)" stroke-width="3"/><circle cx="420" cy="152" r="3" fill="var(--amber)"/>`,
+  `<path d="M516 96 v48 a6 6 0 0 0 6 6 h36 a6 6 0 0 0 6 -6 v-48" fill="none" stroke="var(--text)" stroke-width="2"/><rect x="517" y="126" width="46" height="23" fill="var(--amber)"/><path d="M528 90 q-6 -8 0 -16 q6 -8 0 -16 M546 90 q-6 -8 0 -16 q6 -8 0 -16" stroke="var(--muted)" stroke-width="2" fill="none"/>`];
+ return `<svg viewBox="0 0 600 200" role="img" aria-label="Các bước chiết tinh dầu cam bằng ethanol">
+  <text x="20" y="20" class="svtitle">Vỏ cam 100 g · chỉ lấy phần vỏ vàng</text>
+  ${xs.slice(0,4).map(x=>`<path d="M${x+42} 118 h36" stroke="var(--line)" stroke-width="2"/><path d="M${x+72} 113 l6 5 l-6 5" fill="none" stroke="var(--line)" stroke-width="2"/>`).join("")}
+  ${icons.join("")}
+  ${xs.map((x,i)=>`<text x="${x}" y="176" text-anchor="middle" class="svlab">${labels[i][0]}</text><text x="${x}" y="192" text-anchor="middle" class="svlab">${labels[i][1]}</text>`).join("")}
+ </svg>`}
+
+function qHeader(qid,extra){return `<div class="qtag"><span class="pill">${PART[Q[qid].p]}</span><span class="pill">Câu ${qid}</span>${extra||""}</div>`}
+function vQuestion(){
+  const c=S.cur,q=Q[c.qid],mc=!!q.o,r=S.round;
+  const ansTeam=c.stage==="steal"?c.stealTeam:c.team,T=S.teams[ansTeam],reveal=c.stage==="reveal";
+  let who="";
+  if(c.stage==="answer")who=`<div class="callout" style="--tc:${tc(c.team)}"><span class="tagname">Nhiệm vụ chính</span><span class="who"><span class="sw"></span>${esc(T.name)}</span><span>Ký chủ: <b>số ${c.spk}</b></span><span class="muted">· thưởng ${PTS[r].turn} EXP</span></div>`;
+  if(c.stage==="steal")who=`<div class="callout" style="--tc:${tc(c.stealTeam)}"><span class="tagname">Cơ duyên</span><span class="who"><span class="sw"></span>${esc(T.name)}</span><span>Ký chủ: <b>số ${c.stealSpk}</b></span><span class="muted">· thưởng ${PTS[r].steal} EXP</span></div>`;
+  if(reveal)who=`<div class="result" style="color:${c.winner!=null?"var(--good)":"var(--muted)"}">${c.winner!=null?`Nhiệm vụ hoàn thành · ${esc(S.teams[c.winner].name)} +${c.gain} EXP`:"Nhiệm vụ thất bại · không hội nào nhận EXP"}</div>`;
+  const opts=mc?`<div class="opts">${q.o.map((o,i)=>{const cls=reveal&&i===q.a?"ok":c.wrong.includes(i)?"x":"";
+    return `<button class="opt ${cls}" data-act="choose" data-i="${i}" ${reveal||c.wrong.includes(i)?"disabled":""}><b>${"ABCD"[i]}</b><span>${esc(o)}</span></button>`}).join("")}</div>`:"";
+  const ans=reveal?`<div class="answer"><div class="k">Đáp án: ${mc?"ABCD"[q.a]+". "+esc(q.o[q.a]):esc(q.a)}</div>${q.ex?`<div class="ex">${esc(q.ex)}</div>`:""}</div>`:"";
+  const canFlash=!reveal&&!T.flash[r-1];
+  const ctr=reveal?`<span class="sp"></span><button class="btn primary" data-act="next">Tiếp tục</button>`
+    :mc?`<span class="hint">Bấm vào phương án mà ký chủ nói.</span><span class="sp"></span><button class="btn bad" data-act="judge" data-ok="0">Hết giờ / không trả lời</button>`
+       :`<span class="hint">Đáp án mẫu nằm trong file đáp án của MC. Chấm theo ý chính.</span><span class="sp"></span><button class="btn good" data-act="judge" data-ok="1">Đúng</button><button class="btn bad" data-act="judge" data-ok="0">Sai / hết giờ</button>`;
+  return `${who}<div class="qwrap"><div style="min-width:0">${qHeader(c.qid,mc?"":`<span class="pill">Tự luận ngắn</span>`)}<div class="qtext">${esc(q.q)}</div>${opts}</div>
+    ${reveal?"":`<div class="timer"><div class="ring" id="ring"><span>–</span></div>
+      <button class="btn" data-act="flash" ${canFlash?"":"disabled"}>Ngưng đọng +10 giây</button>
+      <button class="btn" data-act="pause">${timer.paused?"Chạy tiếp":"Tạm dừng"}</button></div>`}</div>${ans}<div class="controls">${ctr}</div>`}
+function vTF(){
+  const f=S.tf,q=Q[f.qid],r=S.round,pts=f.boss?PTS[2].boss:PTS[r].tf;
+  const head=`<div class="banner"><div><span class="systitle">[ Hệ thống ] ${f.boss?"Boss cuối chương xuất hiện":"Sự kiện thế giới"}</span><h2>Cả 4 hội cùng trả lời · ${pts} EXP cho mỗi hội đúng</h2></div></div>`;
+  const writers=`<div class="marks">${S.teams.map((t,i)=>`<div class="mark" style="--tc:${tc(i)}"><span class="nm">${esc(t.name)}</span><span class="st">Ký chủ viết: số ${f.spk[i]}</span></div>`).join("")}</div>`;
+  const opts=`<div class="opts">${q.o.map((o,i)=>`<div class="opt ${f.stage!=="answer"&&i===q.a?"ok":""}"><b>${"ABCD"[i]}</b><span>${esc(o)}</span></div>`).join("")}</div>`;
+  const body=`<div class="qwrap"><div style="min-width:0">${qHeader(f.qid)}<div class="qtext">${esc(q.q)}</div>${opts}</div>
+    ${f.stage==="answer"?`<div class="timer"><div class="ring" id="ring"><span>–</span></div><button class="btn" data-act="pause">${timer.paused?"Chạy tiếp":"Tạm dừng"}</button></div>`:""}</div>`;
+  if(f.stage==="answer")return head+writers+body+`<div class="controls"><span class="hint">Các hội viết chữ cái A–D rồi úp bảng. Hết giờ thì cùng giơ lên.</span><span class="sp"></span><button class="btn primary" data-act="tfJudge">Thu bảng và chấm</button></div>`;
+  const ans=`<div class="answer"><div class="k">Đáp án: ${"ABCD"[q.a]}. ${esc(q.o[q.a])}</div>${q.ex?`<div class="ex">${esc(q.ex)}</div>`:""}</div>`;
+  if(f.stage==="judge")return head+body+ans+`<p class="hint">Bấm vào các hội viết đúng.</p><div class="marks">${S.teams.map((t,i)=>`<button class="mark ${f.marks[i]?"on":""}" style="--tc:${tc(i)}" data-act="tfMark" data-i="${i}" aria-pressed="${f.marks[i]}"><span class="nm">${esc(t.name)}</span><span class="st">${f.marks[i]?"Đúng":"Chưa chọn"}</span></button>`).join("")}</div>
+    <div class="controls"><span class="sp"></span><button class="btn primary" data-act="tfApply">Phát thưởng EXP</button></div>`;
+  return head+body+ans+`<div class="marks">${S.teams.map((t,i)=>`<div class="mark ${f.marks[i]?"on":""}" style="--tc:${tc(i)}"><span class="nm">${esc(t.name)}</span><span class="st">${f.marks[i]?"+"+pts+" EXP":"0 EXP"}</span></div>`).join("")}</div>
+    <div class="controls"><span class="sp"></span><button class="btn primary" data-act="next">Tiếp tục</button></div>`}
+function ranking(){return S.teams.map((t,i)=>({i,t})).sort((a,b)=>b.t.score-a.t.score)}
+function rankHTML(){const R=ranking();let pos=0,prev=null;return `<div class="rank">${R.map((x,k)=>{if(x.t.score!==prev){pos=k+1;prev=x.t.score}
+  return `<div class="rk ${pos===1?"first":""}" style="--tc:${tc(x.i)}"><span class="no">#${pos}</span><b>${esc(x.t.name)}</b><span class="lvl">Cấp ${lvl(x.t.score)}</span><span class="p">${x.t.score}</span></div>`}).join("")}</div>`}
+function vInterlude(){return `<div class="banner"><div><span class="systitle">[ Hệ thống ] Chương 1 hoàn thành</span><h2>Bảng xếp hạng Tân Thủ Thôn</h2></div></div>${rankHTML()}
+  <p class="muted">Mở khóa Chương 2 · Phòng Luyện Dầu: EXP gấp đôi, Boss cuối chương 30 EXP. Kỹ năng Ngưng đọng thời gian được hồi lại cho mọi hội.</p>
+  ${labMap(false)}<div class="controls"><span class="sp"></span><button class="btn primary" data-act="round2">Vào Chương 2</button></div>`}
+function vEnd(){
+  const R=ranking(),top=R[0].t.score,tied=R.filter(x=>x.t.score===top);let tb="";
+  if(tied.length>1&&!S.tiebreak?.done){const step=S.tiebreak?.step||1,list=step===1?TN1_ORDER:TN2_ORDER,shown=S.tiebreak?.["shuf"+step]||list;
+    tb=`<div class="labcard" style="display:flex;flex-direction:column;gap:10px"><span class="systitle">[ Hệ thống ] Thử thách thăng thiên · ${step===1?"TN1":"TN2"}</span>
+      <h3>${tied.map(x=>esc(x.t.name)).join(", ")} bằng EXP. Viết lại thứ tự đúng của các bước sau:</h3>
+      <ol class="orderlist" type="a">${shown.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>
+      ${S.tiebreak?.show?`<div class="answer"><div class="k">Thứ tự đúng:</div><ol class="orderlist">${list.map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div>
+        <p class="hint">Bấm hội viết đúng hoàn toàn. Nhiều hội cùng đúng hoặc cùng sai thì chuyển tiếp.</p>
+        <div class="controls">${tied.map(x=>`<button class="btn" data-act="tbWin" data-i="${x.i}">${esc(x.t.name)} vượt qua</button>`).join("")}<span class="sp"></span>
+        ${step===1?`<button class="btn" data-act="tbNext">Vẫn hòa, sang TN2</button>`:`<button class="btn" data-act="tbCo">Cùng nhận danh hiệu</button>`}</div>`
+      :`<div class="controls"><span class="sp"></span><button class="btn primary" data-act="tbShow">Hiện thứ tự đúng</button></div>`}</div>`}
+  const champ=S.tiebreak?.winner!=null?[S.tiebreak.winner]:S.tiebreak?.co?tied.map(x=>x.i):tied.length===1?[R[0].i]:null;
+  return `<div class="film"><div class="banner"><div><span class="eyebrow">Video kết thúc</span><h2>Thắng bằng chính thực lực</h2></div></div>
+     <video id="outroVid" src="ket-thuc-v1.mp4" controls playsinline preload="metadata"></video>
+     <span class="hint">Bấm phát để chiếu đoạn kết, khoảng 1 phút, có âm thanh.</span></div>
+   ${champ?`<div class="title-card"><span class="systitle">[ Hệ thống ] Danh hiệu mới được trao</span><div class="t">Đại Tinh Dầu Học Sư</div><h2>${champ.map(i=>esc(S.teams[i].name)).join(" và ")}</h2></div>`
+    :`<div class="banner"><div><span class="systitle">[ Hệ thống ] Kết thúc Chương 2</span><h2>Cần thử thách thăng thiên</h2></div></div>`}
+   ${rankHTML()}${tb}
+   <div class="labcard"><span class="systitle">[ Nhiệm vụ chính mới ]</span><p style="margin:4px 0 0">Quay về thế giới cũ… và vô địch mùa giải sau. Thua một trận, không phải thua cả mùa giải.</p></div>
+   <div class="controls"><span class="sp"></span><button class="btn" data-act="reset">Ván mới</button></div>`}
+
+function gotoSlot(){
+  if(S.idx>=S.sched.length){stopTimer();S.phase=S.round===1?"interlude":"end";if(S.phase==="end"){S.round=0;S.tiebreak={step:1,shuf1:shuffle(TN1_ORDER)}}return}
+  const sl=S.sched[S.idx];
+  if(sl.kind==="tf"){S.phase="tf";S.tf={qid:sl.qid,boss:!!sl.boss,stage:"answer",marks:[false,false,false,false],spk:[0,1,2,3].map(takeSpeaker)};S.used[sl.qid]=true;startTimer(TIME.tf);
+    setTimeout(()=>{toast(sl.boss?"<em>Boss cuối chương</em> đã xuất hiện!":"<em>Sự kiện thế giới</em> bắt đầu. Mọi hội cùng tham gia.");ding()},50)}
+  else{S.phase="board";stopTimer()}
+}
+const A={
+  rules(){$("rulesBody").innerHTML=rulesHTML();$("rulesOv").hidden=false},
+  renameOpen(){$("renameBody").innerHTML=S.teams.map((t,i)=>`<div class="trow" style="--tc:${tc(i)};grid-template-columns:14px 1fr"><span class="sw"></span><input id="rn${i}" value="${esc(t.name)}" maxlength="40" aria-label="Tên hội ${i+1}"></div>`).join("");$("renameOv").hidden=false;setTimeout(()=>{const f=$("rn0");if(f){f.focus();f.select()}},0)},
+  closeRename(){$("renameOv").hidden=true},
+  saveNames(){push();S.teams.forEach((t,i)=>{const v=$("rn"+i).value.trim();if(v)t.name=v.slice(0,40)});$("renameOv").hidden=true;if(S.phase!=="intro")$("stage").innerHTML="";render();toast("Đã cập nhật tên hội.")},
+  outroOpen(){$("outroOv").hidden=false;const v=$("outroOvVid");if(v){const p=v.play();if(p&&p.catch)p.catch(()=>{})}},
+  outroClose(){const v=$("outroOvVid");if(v)v.pause();$("outroOv").hidden=true},
+  closeRules(){$("rulesOv").hidden=true},
+  reset(){$("confirmOv").hidden=false},
+  closeConfirm(){$("confirmOv").hidden=true},
+  doReset(){$("confirmOv").hidden=true;stopTimer();hist=[];S=fresh();$("stage").innerHTML="";render()},
+  undo(){if(!hist.length)return;S=JSON.parse(hist.pop());stopTimer();$("stage").innerHTML="";render()},
+  intro(){if(S.phase==="intro")return;stopTimer();S.back=S.phase;S.phase="intro";$("stage").innerHTML="";render()},
+  toSetup(){const v=$("introVid");if(v)v.pause();if(S.back){S.phase=S.back;S.back=null}else S.phase="setup";$("stage").innerHTML="";render();
+    if(S.phase==="question"&&S.cur&&S.cur.stage!=="reveal")startTimer(S.cur.stage==="steal"?TIME.steal:(Q[S.cur.qid].o?TIME.mc:TIME.sa));
+    if(S.phase==="tf"&&S.tf&&S.tf.stage==="answer")startTimer(TIME.tf)},
+  start(){push();S.teams.forEach((t,i)=>{t.name=($("tn"+i).value.trim()||TEAMDEF[i].name).slice(0,40);t.members=Math.min(40,Math.max(1,parseInt($("tm"+i).value)||9));t.score=0;t.spk=0;t.flash=[false,false]});
+    S.round=1;S.used={};S.lanes={};LANES.forEach(L=>S.lanes[L.k]=shuffle(L.ids));S.sched=buildSched(1);S.idx=0;gotoSlot();render();toast("Đã liên kết 4 hội ký chủ. <em>Chương 1</em> bắt đầu.");ding()},
+  pick(el){if(S.phase!=="board")return;push();const id=+el.dataset.id,sl=S.sched[S.idx];S.used[id]=true;
+    S.cur={qid:id,team:sl.team,stage:"answer",wrong:[],spk:takeSpeaker(sl.team),winner:null,gain:0};S.phase="question";startTimer(Q[id].o?TIME.mc:TIME.sa);render()},
+  choose(el){const c=S.cur;if(c.stage==="reveal")return;push();const i=+el.dataset.i;resolve(i===Q[c.qid].a,i)},
+  judge(el){push();resolve(el.dataset.ok==="1")},
+  flash(){const c=S.cur;const t=c.stage==="steal"?c.stealTeam:c.team;if(S.teams[t].flash[S.round-1])return;push();S.teams[t].flash[S.round-1]=true;addTime(10);render();toast(`${esc(S.teams[t].name)} dùng <em>Ngưng đọng thời gian</em>: +10 giây.`)},
+  pause(){if(timer.paused){timer.paused=false;timer.end=Date.now()+timer.left*1000;timer.id=setInterval(tick,200)}else{timer.left=Math.max(0,(timer.end-Date.now())/1000);timer.paused=true;stopTimer()}render()},
+  next(){push();S.idx++;S.cur=null;S.tf=null;gotoSlot();render()},
+  tfJudge(){push();S.tf.stage="judge";stopTimer();render()},
+  tfMark(el){const i=+el.dataset.i;S.tf.marks[i]=!S.tf.marks[i];render()},
+  tfApply(){push();const pts=S.tf.boss?PTS[2].boss:PTS[S.round].tf;S.tf.marks.forEach((m,i)=>{if(m)award(i,pts)});if(!S.tf.marks.some(Boolean))toast("Không hội nào vượt qua sự kiện.");S.tf.stage="reveal";render()},
+  round2(){push();S.round=2;S.sched=buildSched(2);S.idx=0;gotoSlot();render();toast("Mở khóa <em>Chương 2 · Phòng Luyện Dầu</em>. EXP gấp đôi.");levelSound()},
+  tbShow(){push();S.tiebreak=S.tiebreak||{step:1};S.tiebreak.show=true;render()},
+  tbNext(){push();S.tiebreak={step:2,shuf2:shuffle(TN2_ORDER)};render()},
+  tbWin(el){push();S.tiebreak.winner=+el.dataset.i;S.tiebreak.done=true;render();levelSound()},
+  tbCo(){push();S.tiebreak.co=true;S.tiebreak.done=true;render();levelSound()}
+};
+function resolve(ok,wrongIdx){
+  const c=S.cur,r=S.round;
+  if(ok){const g=c.stage==="steal"?PTS[r].steal:PTS[r].turn,w=c.stage==="steal"?c.stealTeam:c.team;c.winner=w;c.gain=g;c.stage="reveal";stopTimer();award(w,g);render();return}
+  if(wrongIdx!=null)c.wrong.push(wrongIdx);
+  if(c.stage==="answer"){c.stealTeam=(c.team+1)%4;c.stealSpk=takeSpeaker(c.stealTeam);c.stage="steal";startTimer(TIME.steal);setTimeout(()=>toast(`Cơ duyên rơi vào <em>${esc(S.teams[c.stealTeam].name)}</em>.`),30)}
+  else{c.stage="reveal";stopTimer()}
+  render();
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b||b.disabled)return;const f=A[b.dataset.act];if(f)f(b)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){$("rulesOv").hidden=true;$("confirmOv").hidden=true;$("renameOv").hidden=true;if(!$("outroOv").hidden)A.outroClose()}
+  if(e.key==="Enter"&&!$("renameOv").hidden&&e.target.tagName==="INPUT"){e.preventDefault();A.saveNames()}});
+document.addEventListener("ended",e=>{if(e.target.id==="introVid"){const b=$("afterIntro");if(b){b.classList.add("primary");b.focus()}}},true);
+
+if(S.phase==="question"&&S.cur&&S.cur.stage!=="reveal")startTimer(S.cur.stage==="steal"?TIME.steal:(Q[S.cur.qid].o?TIME.mc:TIME.sa));
+if(S.phase==="tf"&&S.tf&&S.tf.stage==="answer")startTimer(TIME.tf);
+if(S.phase==="setup")S.phase="intro";
+render();
+</script>
+
+</body>
+</html>
